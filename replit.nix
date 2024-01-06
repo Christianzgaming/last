@@ -1,5 +1,8 @@
 { pkgs }: {
 	deps = [
+   pkgs.telnet
+   pkgs.unixtools.ping
+   pkgs.mcron
 		pkgs.nodejs-16_x
 		pkgs.nodePackages.typescript-language-server
 		pkgs.libuuid
