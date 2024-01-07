@@ -5,7 +5,7 @@ module.exports = {
         name: "2gpt",
         aliases: ["2gpt", "gpt2"],
         version: "1.0",
-        author: "Team vortex",
+        author: "ChristianZ",
         shortDescription: "Ask a question to GPT-3.5.",
         longDescription: "Ask a question to GPT-3.5 using the provided API.",
         category: "ai",

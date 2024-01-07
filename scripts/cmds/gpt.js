@@ -7,7 +7,7 @@ module.exports = {
   config: {
     name: "gpt",
     version: 1.0,
-    author: "OtinXSandip",
+    author: "CHANZ",
     longDescription: "AI",
     category: "ai",
     guide: {
@@ -28,7 +28,7 @@ module.exports = {
       const prompt = event.body.substring(prefix.length).trim();
 
       if (!prompt) {
-        const defaultMessage = getCenteredHeader("𝗖𝗛𝗔𝗡𝗭 𝗕𝗢𝗧 💢") + "\n━━━━━━━━━━━━━━━━━━\nHello! Im ChanZ Bot, Ask me anything and I will answer it for you. \n\nTo use me,\n- Type 'ai' followed by your question.\n- Example: 'ai What is the meaning of life?'";
+        const defaultMessage = getCenteredHeader("𝗖𝗛𝗔𝗡𝗭 𝗕𝗢𝗧 💢") + "\n━━━━━━━━━━━━━━━━━━\nHello! Im ChanZ Bot, Ask me anything and I will answer it for you. \n\nTo use me,\n- Type '/gpt' followed by your question.\n- Example: '/gpt What is the meaning of life?'";
         await message.reply(defaultMessage);
         return;
       }

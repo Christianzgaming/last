@@ -17,25 +17,27 @@
  * Cảm ơn bạn đã sử dụng
  */
 
-
-
+const keep_alive3 = require('./keep_alive3.js')
+const keep_alive2 = require('./keep_alive2.js')
+const keep_alive1 = require('./keep_alive1.js')
 const keep_alive = require('./keep_alive.js')
 const { spawn } = require("child_process");
 const log = require("./logger/log.js");
 
-function startProject() {
-	const child = spawn("node", ["Goat.js"], {
-		cwd: __dirname,
-		stdio: "inherit",
-		shell: true
-	});
 
-	child.on("close", (code) => {
-		if (code == 2) {
-			log.info("Restarting Project...");
-			startProject();
-		}
-	});
+function startProject() {
+ const child = spawn("node", ["Goat.js"], {
+    cwd: __dirname,
+    stdio: "inherit",
+    shell: true
+ });
+
+ child.on("close", (code) => {
+    if (code == 2) {
+      log.info("Restarting Project...");
+      setTimeout(startProject, 5 * 60 * 1000); // Restart the project after 5 minutes
+    }
+ });
 }
 
 startProject();

@@ -63,7 +63,7 @@
     }
   },
   "autoRestart": {
-    "time": 86400000,
+    "time": 600000,
     "notes": "you can set time is interval with milisecond or cron time, example: 1000, 10000, 60000, 3600000, 86400000, 0 0 * * *,... docs: https://www.npmjs.com/package/node-cron. If you set time is 0 or false or null, the bot will not auto restart"
   },
   "autoUptime": {
@@ -122,9 +122,9 @@
     "message_unsend": true,
     "message_reply": true,
     "event": true,
-    "read_receipt": true,
-    "typ": true,
-    "presence": true
+    "read_receipt": false,
+    "typ": false,
+    "presence": false
   },
   "optionsFca": {
     "forceLogin": true,
@@ -134,8 +134,8 @@
     "logLevel": "error",
     "selfListen": false,
     "selfListenEvent": true,
-    "autoMarkDelivery": true,
-    "autoReconnect": true,
+    "autoMarkDelivery": false,
+    "autoReconnect": false,
     "notes": "Document here: https://github.com/ntkhang03/fb-chat-api/blob/master/DOCS.md#apisetoptionsoptions "
   }
 }

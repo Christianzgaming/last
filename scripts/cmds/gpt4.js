@@ -29,7 +29,7 @@ module.exports = {
       const prompt = event.body.substring(prefix.length).trim();
 
       if (!prompt) {
-        const defaultMessage = getCenteredHeader("𝗖𝗛𝗔𝗡𝗭v4 𝗕𝗢𝗧 🕓") + "\n━━━━━━━━━━━━━━━━━━\nHello! Im ChaNZ Bot, Ask me anything and I will answer it for you. \n\nTo use me,\n- Type 'ai' followed by your question.\n- Example: 'ai What is the meaning of life?'";
+        const defaultMessage = getCenteredHeader("𝗖𝗛𝗔𝗡𝗭v4 𝗕𝗢𝗧 🕓") + "\n━━━━━━━━━━━━━━━━━━\nHello! Im ChaNZ Bot, Ask me anything and I will answer it for you. \n\nTo use me,\n- Type '/4gpt' followed by your question.\n- Example: '/4gpt What is the meaning of life?'";
         await message.reply(defaultMessage);
         return;
       }

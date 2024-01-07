@@ -3,11 +3,11 @@ const Data = {};
 
 module.exports = {
   config: {
-    name: "3gpt",
+    name: "5gpt",
     version: 2.0,
     author: "ChristianZ",
     longDescription: "gpt with draw",
-    category: "ai",
+    category: "gimini",
     guide: {
       en: "{p}{n} questions",
     },
@@ -36,9 +36,9 @@ message.reply("please provide questions");
 
       const encodedPrompt = encodeURIComponent(Data[chat]);
 
-      if (prompt.includes("draw")) {
+      if (prompt.includes("2")) {
         const [promptText, model] = args.join(' ').split('|').map((text) => text.trim());
-        const puti = model || "2";
+        const puti = model || "3" || "1" || "2" || "4" || "5";;
         const baseURL = `https://sandipapi
 .onrender.com/sdxl?prompt=${promptText}&model=${puti}`;
 
@@ -85,22 +85,22 @@ you can reply for continue chatting🫥`,
 
       const encodedPrompt = encodeURIComponent(Data[chat]);
 
-      if (prompt.includes("draw")) {
+      if (prompt.includes("2")) {
         const [promptText, model] = args.join(' ').split('|').map((text) => text.trim());
-        const puti = model || "2";
+        const puti = model || "3" || "1" || "2" || "4" || "5";;
         const baseURL = `https://sandipapi.onrender.com/sdxl?prompt=${promptText}&model=${puti}`;
 
         message.reply({
           attachment: await global.utils.getStreamFromURL(baseURL)
         });
       } else {
-        const response = await axios.get(`https://sandipapi.onrender.com/gpt?prompt=${encodedPrompt}`);
+        const response = await axios.get(`https://sandipapi.onrender.com/gemini?prompt=${encodedPrompt}`);
         const answer = response.data.answer;
 
         message.reply({
           body: `${answer}
 
-you can reply for continue chatting 🫥`,
+you can reply for continue chatting gemini 🫥`,
         }, (err, info) => {
           global.GoatBot.onReply.set(info.messageID, {
             commandName: this.config.name,

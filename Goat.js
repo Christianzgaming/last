@@ -194,26 +194,24 @@ global.GoatBot.envEvents = global.GoatBot.configCommands.envEvents;
 const getText = global.utils.getText;
 
 // ———————————————— AUTO RESTART ———————————————— //
-if (config.autoRestart) {
-	const time = config.autoRestart.time;
-	if (!isNaN(time) && time > 0) {
-		utils.log.info("AUTO RESTART", getText("Goat", "autoRestart1", utils.convertTime(time, true)));
-		setTimeout(() => {
-			utils.log.info("AUTO RESTART", "Restarting...");
-			process.exit(2);
-		}, time);
-	}
-	else if (typeof time == "string" && time.match(/^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$/gmi)) {
-		utils.log.info("AUTO RESTART", getText("Goat", "autoRestart2", time));
-		const cron = require("node-cron");
-		cron.schedule(time, () => {
-			utils.log.info("AUTO RESTART", "Restarting...");
-			process.exit(2);
-		});
-	}
-}
-
-(async () => {
+  if (config.autoRestart) {
+      const time = config.autoRestart.time;
+  if (!isNaN(time) && time > 0) {
+      utils.log.info("AUTO RESTART", getText("Goat", "autoRestart1", utils.convertTime(time, true)));
+      setTimeout(() => {
+          utils.log.info("AUTO RESTART", "Restarting...");
+          process.exit(2);
+      }, time);
+  } else if (typeof time === "string" && time === "*/7 * * * *") {
+      utils.log.info("AUTO RESTART", getText("Goat", "autoRestart2", time));
+      const cron = require("node-cron");
+      cron.schedule(time, () => {
+          utils.log.info("AUTO RESTART", "Restarting...");
+          process.exit(2);
+      });
+  }
+  }
+  (async () => {
 	// ———————————————— SETUP MAIL ———————————————— //
 	const { gmailAccount } = config.credentials;
 	const { email, clientId, clientSecret, refreshToken } = gmailAccount;

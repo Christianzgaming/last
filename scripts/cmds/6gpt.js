@@ -3,11 +3,11 @@ const Data = {};
 
 module.exports = {
   config: {
-    name: "3gpt",
+    name: "6gpt",
     version: 2.0,
     author: "ChristianZ",
     longDescription: "gpt with draw",
-    category: "ai",
+    category: "linerai",
     guide: {
       en: "{p}{n} questions",
     },
@@ -94,13 +94,13 @@ you can reply for continue chatting🫥`,
           attachment: await global.utils.getStreamFromURL(baseURL)
         });
       } else {
-        const response = await axios.get(`https://sandipapi.onrender.com/gpt?prompt=${encodedPrompt}`);
+        const response = await axios.get(`https://sandipapi.onrender.com/linerai?prompt=${encodedPrompt}`);
         const answer = response.data.answer;
 
         message.reply({
           body: `${answer}
 
-you can reply for continue chatting 🫥`,
+you can reply for continue chatting linerai 🫥`,
         }, (err, info) => {
           global.GoatBot.onReply.set(info.messageID, {
             commandName: this.config.name,
