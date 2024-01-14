@@ -59,6 +59,7 @@
     "sqlite3": "^5.0.5",
     "srod-v2": "^1.0.2",
     "systeminformation": "^5.21.22",
+    "tesseract.js": "^5.0.4",
     "tinyurl": "^1.1.7",
     "totp-generator": "^0.0.13",
     "websocket-stream": "^5.5.2",

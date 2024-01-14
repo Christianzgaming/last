@@ -1,4 +1,4 @@
-.cmd install video.js const axios = require("axios");
+const axios = require("axios");
 const fs = require("fs-extra");
 const ytdl = require("ytdl-core");
 const yts = require("yt-search");
