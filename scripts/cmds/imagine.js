@@ -1,91 +1,79 @@
 const axios = require('axios');
-const { getStreamFromURL } = global.utils;
-
 module.exports = {
   config: {
     name: "imagine",
-    aliases: ["dall-e"],
-    author: "Samir",
     version: "1.0",
+    author: "rehat--",
     countDown: 10,
-    role: 0,
-    shortDescription: "Generates an image from a text description",
-    longDescription: "Generates an image from a text description",
+    longDescription: {
+      en: "Create an image from your text with 4 models like midjourney."
+    },
     category: "ai",
+    role: 0,
     guide: {
-      en: "{pn} <text>"
+      en: '1 | DreamshaperXL10' +
+        '\n2 | DynavisionXL' +
+        '\n3 | JuggernautXL' +
+        '\n4 | RealismEngineSDXL' +
+        '\n5 | Sdxl 1.0'
     }
   },
 
-  langs: {
-    en: {
-      loading: "Generating image, please wait...",
-      error: "An error occurred, please try again later",
-      approve_success: "The imagine command has been approved!",
-      approve_error: "Only administrators can approve the imagine command",
-      disapprove_success: "The imagine command has been disapproved!",
-      disapprove_error: "Only administrators can disapprove the imagine command",
-      already_approved: "imagine command has already been approved",
-      already_disapproved: "The imagine command has already been disapproved",
-      group_not_approved: "imagine is paid command.Donate to my admin to use it"
-    }
+  onStart: async function ({ api, event, args, message }) {
+    const info = args.join(' ');
+    const [promptPart, modelPart] = info.split('|').map(item => item.trim());
+
+    if (!promptPart) return message.reply("Add something baka.");
+
+    message.reply("Please wait...matatagalan bobo ni chan e⏳", async (err, info) => {
+      let ui = info.messageID;
+
+      try {
+        const modelParam = modelPart;
+        let apiUrl = `https://turtle-apis.onrender.com/api/v2/sdxl?prompt=${encodeURIComponent(promptPart)}`;
+        if (modelPart) {
+          apiUrl += `&model=${modelParam}`;
+        }
+
+        const response = await axios.get(apiUrl);
+        const combinedImg = response.data.combinedImage;
+        const img = response.data.imageUrls.image;
+        message.unsend(ui);
+        message.reply({
+          body: "Please reply with the image number (1, 2, 3, 4) to get the corresponding image in high resolution.",
+          attachment: await global.utils.getStreamFromURL(combinedImg)
+        }, async (err, info) => {
+          let id = info.messageID; global.GoatBot.onReply.set(info.messageID, {
+            commandName: this.config.name,
+            messageID: info.messageID,
+            author: event.senderID,
+            imageUrls: response.data.imageUrls
+          });
+        });
+      } catch (error) {
+        console.error(error);
+        api.sendMessage(`${error}`, event.threadID);
+      }
+    });
   },
 
-  onStart: async function ({ event, message, getLang, threadsData, api, args }) {
-    const { threadID } = event;
+  onReply: async function ({ api, event, Reply, usersData, args, message }) {
+    const reply = parseInt(args[0]);
+    const { author, messageID, imageUrls } = Reply;
 
-    if (args[0] === "approve") {
-      if (global.GoatBot.config.adminBot.includes(event.senderID)) {
-        const approved = await threadsData.get(threadID, "settings.imagine_approved");
-        if (approved) {
-          return message.reply(getLang("already_approved"));
-        }
-        await threadsData.set(threadID, true, "settings.imagine_approved");
-        return message.reply(getLang("approve_success"));
-      }
-      return message.reply(getLang("approve_error"));
-    } else if (args[0] === "disapprove") {
-      if (global.GoatBot.config.adminBot.includes(event.senderID)) {
-        const approved = await threadsData.get(threadID, "settings.imagine_approved");
-        if (!approved) {
-          return message.reply(getLang("already_disapproved"));
-        }
-        await threadsData.set(threadID, false, "settings.imagine_approved");
-        return message.reply(getLang("disapprove_success"));
-      }
-      return message.reply(getLang("disapprove_error"));
-    }
-
-    const approved = await threadsData.get(threadID, "settings.imagine_approved");
-    if (!approved) {
-      return message.reply(getLang("group_not_approved"));
-    }
-
-    message.reply(getLang("loading"));
-    const text = args.join(' ');
+    if (event.senderID !== author) return;
 
     try {
-      const { data } = await axios.post(
-        'https://api.openai.com/v1/images/generations',
-        {
-          model: 'image-alpha-001',
-          prompt: text,
-          num_images: 1
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer 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`
-          }
-        }
-      );
-      const imageURL = data.data[0].url;
-      const image = await getStreamFromURL(imageURL);
-      return message.reply({
-        attachment: image
-      });
-    } catch (err) {
-      return message.reply(getLang("error"));
+      if (reply >= 1 && reply <= 4) {
+        const img = imageUrls[`image${reply}`];
+        message.reply({ attachment: await global.utils.getStreamFromURL(img) });
+      } else {
+        message.reply("❌ |  Invalid number try again later. kase tanga ka");
+      }
+    } catch (error) {
+      console.error(error);
+      message.reply(`${error}`, event.threadID);
     }
-  }
+    await message.unsend(Reply.messageID);
+  },
 };

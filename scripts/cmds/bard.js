@@ -1,108 +1,103 @@
 const axios = require('axios');
 
-async function onStart({ api, event }) {
-    const { threadID, messageID, type, messageReply, body } = event;
-    let question = "";
+const geminiApiKey = "AIzaSyD5cwmbKb23YDV5mMOdnei-Z49vDxewVS4";
 
-    if (type === "message_reply" && messageReply.attachments[0]?.type === "photo") {
-        const attachment = messageReply.attachments[0];
-        const imageURL = attachment.url;
-        question = await convertImageToText(imageURL);
-
-        if (!question) {
-            api.sendMessage(
-                "❌ Failed to convert the photo to text. Please try again with a clearer photo.",
-                threadID,
-                messageID
-            );
-            return;
-        }
-    } else {
-        question = body.slice(5).trim();
-
-        if (!question) {
-            api.sendMessage("Please provide a question or query", threadID, messageID);
-            return;
-        }
-    }
-
-    try {
-        const apiBaseUrl = 'http://api.safone.me';
-        const apiEndpoint = '/bard';
-        const apiUrl = apiBaseUrl + apiEndpoint;
-
-        console.log('API URL:', apiUrl);
-        console.log('Question sent:', question);
-
-        const response = await axios.get(apiUrl, { params: { message: question } });
-        const responseData = response.data;
-
-        const responseMessage = responseData.message;
-
-        console.log('API response:', responseMessage);
-
-        api.sendMessage(responseMessage, threadID);
-    } catch (error) {
-        console.error('Error during the API request:', error);
-        api.sendMessage(langs.en.error, threadID);
-    }
-}
-
-const config = {
+const chatbot = {
+  config: {
     name: "bard",
-    version: "1.0",
-    author: "Samir Œ",
-    role: 0, 
-    shortDescription: {
-        en: "Command to interact with the conversation AI."
-    },
-    longDescription: {
-        en: "Use the command by typing /bard ask any question."
-    },
-    category: "Examples", 
-    guide: {
-        en: "Use the command by typing /bard who is elon"
-    }
-};
+    version: "2.0",
+    author: "Cruizex",
+    description: "Generate Responses using Gemini | Vertex by Google LLMs",
+  },
 
-const langs = {
-    en: {
-        error: "Sorry, an error occurred while communicating with the conversation AI."
-    }
-};
-
-async function onReply({ api, event }) {
-    const { threadID, messageReply } = event;
-
-    if (messageReply) {
-        const question = messageReply.body;
-
-        try {
-            const apiBaseUrl = 'http://api.safone.me';
-            const apiEndpoint = '/bard';
-            const apiUrl = apiBaseUrl + apiEndpoint;
-
-            console.log('API URL:', apiUrl);
-            console.log('Question sent:', question);
-
-            const response = await axios.get(apiUrl, { params: { message: question } });
-            const responseData = response.data;
-
-            const responseMessage = responseData.message;
-
-            console.log('API response:', responseMessage);
-
-            api.sendMessage(responseMessage, threadID);
-        } catch (error) {
-            console.error('Error during the API request:', error);
-            api.sendMessage(langs.en.error, threadID);
+  async makeGeminiApiRequest(userInput) {
+    try {
+      const response = await axios.post(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+        {
+          contents: [{
+            parts: [{
+              text: userInput
+            }]
+          }],
+        },
+        {
+          params: { key: geminiApiKey },
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-    }
-}
+      );
 
-module.exports = {
-    config,
-    langs,
-    onStart,
-    onReply
+      const generatedText = response.data.candidates[0].content.parts[0].text;
+      return generatedText;
+    } catch (error) {
+      console.error("Error making Gemini API request:", error.message);
+      throw error;
+    }
+  },
+
+  async handleCommand({ message, event, args, api }) {
+    try {
+      const uid = event.senderID;
+      const encodedPrompt = encodeURIComponent(args.join(" "));
+
+      if (!encodedPrompt) {
+        return message.reply("Please provide questions");
+      }
+
+      const geminiResponse = await this.makeGeminiApiRequest(encodedPrompt);
+
+      message.reply({
+        body: `${geminiResponse}`,
+      }, (err, info) => {
+        global.GoatBot.onReply.set(info.messageID, {
+          commandName: this.config.name,
+          messageID: info.messageID,
+          author: uid,
+          prompt: encodedPrompt,
+          response: geminiResponse,
+        });
+      });
+    } catch (error) {
+      console.error("Error handling command:", error.message);
+    }
+  },
+
+  onStart: function (params) {
+    return this.handleCommand(params);
+  },
+
+  onReply: function (params) {
+    (async () => {
+      try {
+        const uid = params.event.senderID;
+        const context = global.GoatBot.onReply.get(params.messageID);
+
+        if (context) {
+          const { prompt, response } = context;
+          const newPrompt = `${prompt} ${params.args.join(" ")}`;
+
+          const geminiResponse = await this.makeGeminiApiRequest(newPrompt);
+          global.GoatBot.onReply.set(params.messageID, {
+            ...context,
+            prompt: newPrompt,
+            response: geminiResponse,
+          });
+
+          params.message.reply({
+            body: `${geminiResponse}`,
+          });
+        } else {
+          this.handleCommand(params);
+        }
+      } catch (error) {
+        console.error("Error handling reply:", error.message);
+      }
+    })();
+  },
 };
+
+chatbot.onStart();
+
+module.exports = chatbot;

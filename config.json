@@ -1,7 +1,7 @@
 {
   "facebookAccount": {
     "email": "sophiadump143",
-    "password": "polokiju09",
+    "password": "cjphonehome1234",
     "2FASecret": "",
     "i_user": "",
     "proxy": null,
@@ -25,7 +25,7 @@
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "CHANZBOT",
+  "nickNameBot": "CAGBOT",
   "prefix": "/",
   "database": {
     "type": "sqlite",
@@ -50,7 +50,7 @@
   },
   "dashBoard": {
     "enable": true,
-    "expireVerifyCode": 300000,
+    "expireVerifyCode": 30000,
     "port": 3001
   },
   "serverUptime": {
@@ -63,7 +63,7 @@
     }
   },
   "autoRestart": {
-    "time": 400000,
+    "time": 132000000,
     "notes": "you can set time is interval with milisecond or cron time, example: 1000, 10000, 60000, 3600000, 86400000, 0 0 * * *,... docs: https://www.npmjs.com/package/node-cron. If you set time is 0 or false or null, the bot will not auto restart"
   },
   "autoUptime": {
@@ -73,7 +73,7 @@
     "notes": "the value of timeInterval is seconds, url is the url you want to send the request to (automatically detected for hosting glitch or replit)"
   },
   "autoLoadScripts": {
-    "enable": false,
+    "enable": true,
     "ignoreCmds": "",
     "ignoreEvents": "",
     "notes": "this feature will automatically load the script when scripts have been changed, you can set ignoreCmds to ignore commands, ignoreEvents to ignore events, separate by comma or space, example: \"cmd1.js cmd2.js cmd3.js\" (without backslash)"

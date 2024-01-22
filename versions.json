@@ -2239,5 +2239,48 @@
     "deleteFiles": {
       "scripts/cmds/list.js": ""
     }
+  },
+  {
+    "version": "1.5.21",
+    "files": {
+      "scripts/cmds/shortcut.js": "Fix errors that do not receive the correct content when there are many characters `=>`"
+    },
+    "deleteFiles": {
+      "scripts/cmds/list.js": ""
+    }
+  },
+  {
+    "version": "1.5.22",
+    "files": {
+      "scripts/cmds/cmd.js": "code optimization",
+      "scripts/cmds/eval.js": "code optimization"
+    },
+    "deleteFiles": {
+      "scripts/cmds/list.js": ""
+    }
+  },
+  {
+    "version": "1.5.23",
+    "files": {
+      "bot/handler/handlerEvents.js": "code optimization",
+      "bot/login/login.js": "code optimization",
+      "scripts/cmds/adminonly.js": "fix command not working",
+      "scripts/cmds/help.js": "language update",
+      "scripts/cmds/ignoreonlyad.js": "language update",
+      "scripts/cmds/ignoreonlyadbox.js": "language update",
+      "scripts/cmds/update.js": "prevent updating too quickly (less than 5 minutes after the latest release is released)"
+    },
+    "deleteFiles": {
+      "scripts/cmds/list.js": ""
+    }
+  },
+  {
+    "version": "1.5.24",
+    "files": {
+      "bot/login/login.js": "fix `RangeError: Invalid array length` when deployed on `heroku` or `pm2`"
+    },
+    "deleteFiles": {
+      "scripts/cmds/list.js": ""
+    }
   }
 ]

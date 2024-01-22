@@ -23,7 +23,7 @@ module.exports = {
 
     const isDisabled = false;
     if (isDisabled) {
-      const replyMessage = ' AI Art command will back soon...\n\nReason:\nMain Server Crashed. I have no idea when Server Owner gonna fix Main server. so please wait...  \nI will send a notice to everyone when its available again 🙏\n\nContact Loid Butter For more info \FB :https://www.facebook.com/profile.php?id=100082741664058';
+      const replyMessage = ' AI Art command will back soon...\n\nReason:\nMain Server Crashed. I have no idea when Server Owner gonna fix Main server. so please wait...  \nI will send a notice to everyone when its available again 🙏';
       message.reply(replyMessage);
       return;
     }
