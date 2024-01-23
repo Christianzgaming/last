@@ -1,103 +1,149 @@
-const axios = require('axios');
+const axios = require("axios");
+const fs = require("fs");
 
-const geminiApiKey = "AIzaSyD5cwmbKb23YDV5mMOdnei-Z49vDxewVS4";
-
-const chatbot = {
+module.exports = {
   config: {
     name: "bard",
-    version: "2.0",
-    author: "Cruizex",
-    description: "Generate Responses using Gemini | Vertex by Google LLMs",
+    version: "1.0",
+    author: "rehat--",
+    countDown: 5,
+    role: 0,
+    longDescription: { en: "Artificial Intelligence Google Bard" },
+    guide: { en: "{pn} <query>" },
+    category: "ai",
+  },
+  clearHistory: function () {
+    global.GoatBot.onReply.clear();
   },
 
-  async makeGeminiApiRequest(userInput) {
-    try {
-      const response = await axios.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
-        {
-          contents: [{
-            parts: [{
-              text: userInput
-            }]
-          }],
-        },
-        {
-          params: { key: geminiApiKey },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  onStart: async function ({ message, event, args, commandName }) {
+    const uid = event.senderID;
+    const prompt = args.join(" ");
 
-      const generatedText = response.data.candidates[0].content.parts[0].text;
-      return generatedText;
-    } catch (error) {
-      console.error("Error making Gemini API request:", error.message);
-      throw error;
+    if (!prompt) {
+      message.reply("Please enter a query.");
+      return;
     }
-  },
 
-  async handleCommand({ message, event, args, api }) {
+    if (prompt.toLowerCase() === "clear") {
+      this.clearHistory();
+      const clear = await axios.get(`https://project-bard.onrender.com/api/bard?query=clear&uid=${uid}`);
+      message.reply(clear.data.message);
+      return;
+    }
+
+    if (event.type === "message_reply" && event.messageReply.attachments && event.messageReply.attachments[0].type === "photo") {
+      const photo = encodeURIComponent(event.messageReply.attachments[0].url);
+      const query = args.join(" ");
+      const url = `https://turtle-apis.onrender.com/api/gemini/img?prompt=${encodeURIComponent(query)}&url=${photo}`;
+      const response = await axios.get(url);
+      message.reply(response.data.answer);
+      return;
+    }
+
+    const apiUrl = `https://project-bard.onrender.com/api/bard?query=${encodeURIComponent(prompt)}&uid=${uid}`;
     try {
-      const uid = event.senderID;
-      const encodedPrompt = encodeURIComponent(args.join(" "));
+      const response = await axios.get(apiUrl);
+      const result = response.data;
 
-      if (!encodedPrompt) {
-        return message.reply("Please provide questions");
+      let content = result.message;
+      let imageUrls = result.imageUrls;
+
+      let replyOptions = {
+        body: content,
+      };
+
+      if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+        const imageStreams = [];
+
+        if (!fs.existsSync(`${__dirname}/cache`)) {
+          fs.mkdirSync(`${__dirname}/cache`);
+        }
+
+        for (let i = 0; i < imageUrls.length; i++) {
+          const imageUrl = imageUrls[i];
+          const imagePath = `${__dirname}/cache/image` + (i + 1) + ".png";
+
+          try {
+            const imageResponse = await axios.get(imageUrl, {
+              responseType: "arraybuffer",
+            });
+            fs.writeFileSync(imagePath, imageResponse.data);
+            imageStreams.push(fs.createReadStream(imagePath));
+          } catch (error) {
+            console.error("Error occurred while downloading and saving the image:", error);
+            message.reply('An error occurred.');
+          }
+        }
+
+        replyOptions.attachment = imageStreams;
       }
 
-      const geminiResponse = await this.makeGeminiApiRequest(encodedPrompt);
-
-      message.reply({
-        body: `${geminiResponse}`,
-      }, (err, info) => {
-        global.GoatBot.onReply.set(info.messageID, {
-          commandName: this.config.name,
-          messageID: info.messageID,
-          author: uid,
-          prompt: encodedPrompt,
-          response: geminiResponse,
-        });
+      message.reply(replyOptions, (err, info) => {
+        if (!err) {
+          global.GoatBot.onReply.set(info.messageID, {
+            commandName,
+            messageID: info.messageID,
+            author: event.senderID,
+          });
+        }
       });
     } catch (error) {
-      console.error("Error handling command:", error.message);
+      message.reply('An error occurred.');
+      console.error(error.message);
     }
   },
 
-  onStart: function (params) {
-    return this.handleCommand(params);
-  },
+  onReply: async function ({ message, event, Reply, args }) {
+    const prompt = args.join(" ");
+    let { author, commandName, messageID } = Reply;
+    if (event.senderID !== author) return;
 
-  onReply: function (params) {
-    (async () => {
-      try {
-        const uid = params.event.senderID;
-        const context = global.GoatBot.onReply.get(params.messageID);
+    try {
+      const apiUrl = `https://project-bard.onrender.com/api/bard?query=${encodeURIComponent(prompt)}&uid=${author}`;
+      const response = await axios.get(apiUrl);
 
-        if (context) {
-          const { prompt, response } = context;
-          const newPrompt = `${prompt} ${params.args.join(" ")}`;
+      let content = response.data.message;
+      let replyOptions = {
+        body: content,
+      };
 
-          const geminiResponse = await this.makeGeminiApiRequest(newPrompt);
-          global.GoatBot.onReply.set(params.messageID, {
-            ...context,
-            prompt: newPrompt,
-            response: geminiResponse,
-          });
+      const imageUrls = response.data.imageUrls;
+      if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+        const imageStreams = [];
 
-          params.message.reply({
-            body: `${geminiResponse}`,
-          });
-        } else {
-          this.handleCommand(params);
+        if (!fs.existsSync(`${__dirname}/cache`)) {
+          fs.mkdirSync(`${__dirname}/cache`);
         }
-      } catch (error) {
-        console.error("Error handling reply:", error.message);
+        for (let i = 0; i < imageUrls.length; i++) {
+          const imageUrl = imageUrls[i];
+          const imagePath = `${__dirname}/cache/image` + (i + 1) + ".png";
+
+          try {
+            const imageResponse = await axios.get(imageUrl, {
+              responseType: "arraybuffer",
+            });
+            fs.writeFileSync(imagePath, imageResponse.data);
+            imageStreams.push(fs.createReadStream(imagePath));
+          } catch (error) {
+            console.error("Error occurred while downloading and saving the image:", error);
+            message.reply('An error occurred.');
+          }
+        }
+        replyOptions.attachment = imageStreams;
       }
-    })();
+      message.reply(replyOptions, (err, info) => {
+        if (!err) {
+          global.GoatBot.onReply.set(info.messageID, {
+            commandName,
+            messageID: info.messageID,
+            author: event.senderID,
+          });
+        }
+      });
+    } catch (error) {
+      console.error(error.message);
+      message.reply("An error occurred.");
+    }
   },
 };
-
-chatbot.onStart();
-
-module.exports = chatbot;

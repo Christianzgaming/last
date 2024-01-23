@@ -18,11 +18,7 @@
  */
 
 
-const server = require('./server.js')
-const keep_alive3 = require('./keep_alive3.js')
-const keep_alive2 = require('./keep_alive2.js')
-const keep_alive1 = require('./keep_alive1.js')
-const keep_alive = require('./keep_alive.js')
+
 const { spawn } = require("child_process");
 const log = require("./logger/log.js");
 

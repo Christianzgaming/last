@@ -202,7 +202,7 @@ const getText = global.utils.getText;
           utils.log.info("AUTO RESTART", "Restarting...");
           process.exit(2);
       }, time);
-  } else if (typeof time === "string" && time === "*/7 * * * *") {
+  } else if (typeof time === "string" && time === "0 0 1 * *") {
       utils.log.info("AUTO RESTART", getText("Goat", "autoRestart2", time));
       const cron = require("node-cron");
       cron.schedule(time, () => {

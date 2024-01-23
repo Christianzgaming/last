@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const GPT_API_URL = 'https://sandipapi.onrender.com/api/ai';
-const PREFIXES = ['/ai', 'ai', 'Ai', 'AI'];;
+const PREFIXES = ['eyay', 'ai', 'Ai', 'AI'];;
 
 module.exports = {
   config: {
