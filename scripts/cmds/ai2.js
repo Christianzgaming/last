@@ -8,7 +8,7 @@ async function ai({ message: m, event: e, args: a, usersData: u }) {
 ]; 
  if (p.some(b => a[0].toLowerCase().startsWith(b))) {
 try {      
-let prompt = "";
+let prompt = ""; v
 if (e.type === "message_reply" && e.messageReply.attachments && e.messageReply.attachments[0]?.type === "photo") {
  const b = await uploadImgbb(e.messageReply.attachments[0].url);
 prompt = a.slice(1).join(" ") + ' ' + b.image.url;

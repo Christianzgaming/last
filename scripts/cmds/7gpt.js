@@ -1,93 +1,79 @@
 const axios = require('axios');
 const tracker = {};
 
-/*
-A Turtle APIs Production created by Turtle Rehat.
-Do not alter the credited information any attempt to do so may result in a permanent ban from Project86 APIs and Turtle APIs.
-*/
-
 module.exports = {
   config: {
     name: "7gpt",
-    version: "1.0",
+    version: "2.0",
     author: "rehat--",
     countDown: 5,
     role: 0,
-    longDescription: "Chat GPT 4 Most Advance LLM",
+    longDescription: "Chat GPT 3.5 Turbo",
     category: "ai",
     guide: { en: "{pn} <query>" },
   },
   clearHistory: function () {
     global.GoatBot.onReply.clear();
   },
-  onStart: async function ({ message, event, args, usersData, api, commandName }) {
+  onStart: async function ({ message, event, args, usersData, commandName }) {
     const prompt = args.join(' ');
+    const userName = await usersData.getName(event.senderID);
     const userID = event.senderID;
     const mid = event.messageID;
 
     if (!args[0]) return message.reply('Please enter a query.');
 
-    if (args[0] == 'clear') {
+    if (args[0] === 'clear') {
       this.clearHistory();
       const c = await clean(userID);
       if (c) return message.reply('Conversation history cleared.');
     }
-
-    api.setMessageReaction('⏳', mid, () => {}, true);
-    gpt(prompt, userID, message, mid, api);
+    gpt(prompt, userID, message, mid, userName);
   },
 
-  onReply: async function ({ Reply, message, event, args, api, usersData }) {
+  onReply: async function ({ Reply, message, event, args, getLang, usersData }) {
     const { author } = Reply;
     if (author !== event.senderID) return;
-
     const mid = event.messageID;
     const prompt = args.join(' ');
     const userID = event.senderID;
-
-    if (args[0] == 'clear') {
-      this.clearHistory();
-      const c = await clean(userID);
-      if (c) return message.reply('Conversation history cleared.');
-    }
-
-    api.setMessageReaction('⏳', mid, () => {}, true);
-    gpt(prompt, userID, message, mid, api);
+    const userName = await usersData.getName(event.senderID);
+    gpt(prompt, userID, message, mid, userName);
   }
 };
 
 async function clean(userID) {
-  if (!tracker[userID]) return true;
   if (tracker[userID]) {
     delete tracker[userID];
     return true;
   }
+  return true;
 }
 
-async function gpt(text, userID, message, mid, api) {
-  tracker[userID] = tracker[userID] || '';
+async function gpt(text, userID, message, mid, userName) {
+  message.reaction('⏳', mid);
+  if (!tracker[userID]) {
+    tracker[userID] = `${userName}.\n`;
+  }
   tracker[userID] += `${text}.\n`;
 
   try {
-    const url = 'https://project86.cyclic.app/api/chat';
-
-    const conversationHistory = encodeURIComponent(tracker[userID]);
-    const getUrl = `${url}?query=${conversationHistory}`;
-
-    const response = await axios.post(getUrl);
-
+    const url = `https://public-apis-project86.vercel.app/api/chat?query=- Current prompt: ${text}\n\n - Conversation:\n${tracker[userID]}\n`;
+    const response = await axios.post(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     const resultText = response.data.answer;
-    tracker[userID] = `${tracker[userID]}${text}.\n${resultText}`;
-
-    api.setMessageReaction('✅', mid, () => {}, true);
-    message.reply(`${resultText}\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙧𝙚𝙥𝙡𝙮 𝙩𝙤 𝙘𝙤𝙣𝙩𝙞𝙣𝙪𝙚 𝙘𝙝𝙖𝙩𝙩𝙞𝙣𝙜.`, (error, info) => {
+    tracker[userID] += `${resultText}`;
+    message.reply(`${resultText}\n\nYou can reply to continue chatting.`, (error, info) => {
       global.GoatBot.onReply.set(info.messageID, {
-        commandName: '7gpt',
-        author: userID,
+        commandName: this.config.name,
+        author: userID
       });
     });
+    message.reaction('✅', mid);
   } catch (error) {
-    api.setMessageReaction('❌', mid, () => {}, true);
-    message.reply('An error occurred.');
+    message.reaction('❌', mid);
   }
 }
